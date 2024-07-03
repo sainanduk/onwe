@@ -25,6 +25,7 @@ const secret = process.env.SECRET_KEY;
 //   }
 // });
 
+<<<<<<< HEAD
 // router.post("/signin", async (req, res) => {
 //   try {
 //     const { username, password } = req.body;
@@ -87,5 +88,42 @@ router.post("/api/webhook", async (req, res) => {
   console.log(`Unhandled event type: ${event.type}`);
   res.status(400).send("Unhandled event type");
 });
+=======
+router.post("/Adminsignin", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const user = await Users.findOne({ where: { username: username } });
+    const decrypt = await bcrypt.compare(password, user.password);
+    if (decrypt) {
+      const accessToken = jwt.sign(
+        { username: user.username, id: user.id },
+        secret,
+        {
+          expiresIn: "7d",
+        }
+      );
+
+      res.json({ token: accessToken, status: 200 });
+      return
+    }
+     else {
+      res.json({ message: "Username or password is incorrect" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+// app.post("/api/webhook", (req, res) => {
+//   const event = req.body;
+
+//   if (event.type === 'user.created') {
+//     const user = event.data;
+//     // Handle new user creation, e.g., save to your database
+//     console.log('New user created:', user.id);
+//   }
+
+//   res.status(200).send('Event received');
+// });
+>>>>>>> 5d397951174ac8d4167a0969ed18f568f4c00e0c
 
 module.exports = router;

@@ -71,9 +71,7 @@ Users.hasMany(Posts, { foreignKey: "authorId", as: "userPosts" });
 const initializeDatabase = async () => {
   try {
     await testConnection();
-    console.log(
-      "Connection to the database has been established successfully."
-    );
+    console.log("Connection to the database has been established successfully.");
 
     await sequelize.sync(); // safer method for production
     console.log("Database and tables have been synced successfully.");
@@ -83,3 +81,9 @@ const initializeDatabase = async () => {
 };
 
 initializeDatabase();
+
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on http://127.0.0.1:${PORT}`);
+});
