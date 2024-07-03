@@ -25,40 +25,67 @@ const secret = process.env.SECRET_KEY;
 //   }
 // });
 
-router.post("/signin", async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    const user = await Users.findOne({ where: { username: username } });
-    const decrypt = await bcrypt.compare(password, user.password);
-    if (decrypt) {
-      const accessToken = jwt.sign(
-        { username: user.username, id: user.id },
-        secret,
-        {
-          expiresIn: "7d",
-        }
-      );
+// router.post("/signin", async (req, res) => {
+//   try {
+//     const { username, password } = req.body;
+//     const user = await Users.findOne({ where: { username: username } });
+//     const decrypt = await bcrypt.compare(password, user.password);
+//     if (decrypt) {
+//       const accessToken = jwt.sign(
+//         { username: user.username, id: user.id },
+//         secret,
+//         {
+//           expiresIn: "7d",
+//         }
+//       );
 
-      res.json({ token: accessToken, status: 200 });
-      return
-    }
-     else {
-      res.json({ message: "Username or password is incorrect" });
-    }
-  } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-app.post("/api/webhook", (req, res) => {
+//       res.json({ token: accessToken, status: 200 });
+//       return
+//     }
+//      else {
+//       res.json({ message: "Username or password is incorrect" });
+//     }
+//   } catch (error) {
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
+router.post("/api/webhook", async (req, res) => {
   const event = req.body;
+  const user = event.data;
 
-  if (event.type === 'user.created') {
-    const user = event.data;
-    // Handle new user creation, e.g., save to your database
-    console.log('New user created:', user.id);
+  if (event.type === "user.created") {
+    const userId = user.id;
+    const username = user.username;
+    const email =
+      user.email_addresses && user.email_addresses.length > 0
+        ? user.email_addresses[0].email_address
+        : "No email provided";
+
+    try {
+      // Check if the user already exists by ID
+      const exist = await Users.findOne({ where: { id: userId } });
+      if (exist) {
+        console.log(`User with ID ${userId} already exists.`);
+        return res.status(200).json({ message: "User already exists" });
+      }
+
+      // Create a new user
+      await Users.create({
+        id: userId,
+        username: username,
+        email: email,
+      });
+
+      console.log(`User with ID ${userId} created successfully.`);
+      return res.status(201).json({ message: "User created" });
+    } catch (error) {
+      console.error(`Error creating user with ID ${userId}:`, error);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
   }
 
-  res.status(200).send('Event received');
+  console.log(`Unhandled event type: ${event.type}`);
+  res.status(400).send("Unhandled event type");
 });
 
 module.exports = router;

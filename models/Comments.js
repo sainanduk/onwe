@@ -8,7 +8,7 @@ const Comments = sequelize.define('comments', {
     autoIncrement: true,
   },
   postId: { type: DataTypes.INTEGER, references: { model: 'posts', key: 'id' } },
-  userId: { type: DataTypes.INTEGER, references: { model: 'users', key: 'id' } },
+  userId: { type: DataTypes.STRING, references: { model: 'users', key: 'id' } },
   content: DataTypes.STRING,
   replies: DataTypes.ARRAY(DataTypes.INTEGER),
   createdAt: DataTypes.DATE,

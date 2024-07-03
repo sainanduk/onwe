@@ -8,7 +8,7 @@ const Clubs = sequelize.define('clubs', {
     autoIncrement: true,
   },
   name: DataTypes.STRING,
-  admin: { type: DataTypes.INTEGER, references: { model: 'users', key: 'id' } },
+  admin: { type: DataTypes.STRING, references: { model: 'users', key: 'id' } },
   members: DataTypes.ARRAY(DataTypes.INTEGER),
   posts: DataTypes.ARRAY(DataTypes.INTEGER),
   createdAt: DataTypes.DATE,

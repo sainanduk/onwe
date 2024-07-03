@@ -3,9 +3,9 @@ const { sequelize } = require('../Config/database');
 
 const Users = sequelize.define('users', {
   id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING,
     primaryKey: true,
-    autoIncrement: true,
+    // autoIncrement: true,
   },
   username: {
     type: DataTypes.STRING,
@@ -38,7 +38,7 @@ const Users = sequelize.define('users', {
   },
   password: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   refreshToken: {
     type: DataTypes.STRING,

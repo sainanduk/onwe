@@ -10,7 +10,7 @@ const Posts = sequelize.define('posts', {
   title: DataTypes.STRING,
   description: DataTypes.STRING,
   likes: DataTypes.INTEGER,
-  authorId: { type: DataTypes.INTEGER, references: { model: 'users', key: 'id' } },
+  authorId: { type: DataTypes.STRING, references: { model: 'users', key: 'id' } },
   media: DataTypes.ARRAY(DataTypes.JSONB),
   category: DataTypes.STRING,
   tags: DataTypes.STRING,
