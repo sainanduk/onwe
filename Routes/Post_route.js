@@ -3,7 +3,7 @@ const router = express.Router();
 const Posts = require('../models/Posts');
 const uploadimages = require('../middlewares/uploadimages'); // Adjust the path as necessary
 const processimages = require('../middlewares/processimages');
-
+const Comments = require('../models/Comments')
 // Route to get all posts
 router.get('/posts', async (req, res) => {
   try {
@@ -125,14 +125,20 @@ router.get('/posts/category/:category', async (req, res) => {
         return res.status(404).json({ message: 'Post not found' });
       }
   
+      // Delete all comments associated with the postId
+      await Comments.destroy({
+        where: { postId: postId }
+      });
+  
       // Delete the post
       await post.destroy();
   
       // Respond with success message
-      res.json({ message: 'Post deleted successfully' });
+      res.json({ message: 'Post and associated comments deleted successfully' });
     } catch (error) {
-      console.error('Error deleting post:', error);
-      res.status(500).json({ message: 'Failed to delete post' });
+      console.error('Error deleting post and comments:', error);
+      res.status(500).json({ message: 'Failed to delete post and comments' });
     }
   });
+  
 module.exports=router
