@@ -1,20 +1,39 @@
 const express = require('express');
 const router = express.Router();
 const Posts = require('../models/Posts');
+const uploadimages = require('../middlewares/uploadimages'); // Adjust the path as necessary
+const processimages = require('../middlewares/processimages');
 
-//get all posts
+// Route to get all posts
 router.get('/posts', async (req, res) => {
-    try {
-      const posts = await Posts.findAll();
-      res.json(posts);
-    } catch (error) {
-      console.error('Error fetching posts:', error);
-      res.status(500).json({ message: 'Failed to fetch posts' });
-    }
-  });
+  try {
+    const posts = await Posts.findAll({
+      where: {
+        clubid: null
+      }
+    });
+
+    // Convert each post to JSON and enrich as needed
+    const enrichedPosts = posts.map(post => {
+      const enrichedPost = post.toJSON(); // Convert Sequelize instance to JSON object
+
+      // Assuming `media` is a property containing image buffer(s)
+      enrichedPost.media = enrichedPost.media.map(imageBuffer => {
+        return Buffer.from(imageBuffer).toString('base64');
+      });
+
+      return enrichedPost;
+    });
+
+    res.json(enrichedPosts);
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    res.status(500).json({ message: 'Failed to fetch posts' });
+  }
+});
 
 //getpost by category
-router.get('/posts/:category', async (req, res) => {
+router.get('/posts/category/:category', async (req, res) => {
   const { category } = req.params;
 
   try {
@@ -68,30 +87,31 @@ router.get('/posts/:category', async (req, res) => {
 
   
   //create new post
-  router.post('/posts', async (req, res) => {
-    const { title, description, userid, media, category, tags, clubid } = req.body;
-  
+  router.post('/posts', uploadimages, processimages, async (req, res) => {
+    const { title, description,category, tags, clubid } = req.body;
+    const userid = req.headers.userid; // Extract user ID from headers
+
     try {
-      // Create new post
-      const newPost = await Posts.create({
-        title,
-        description,
-        likes: 0,
-        userid,
-        media,
-        category,
-        tags,
-        clubid,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
-  
-      res.status(201).json({ message: 'Post created successfully', post: newPost });
+        // Create new post
+        const newPost = await Posts.create({
+            title,
+            description,
+            likes: 0,
+            userid,
+            media: req.mediaData.map(img => img.buffer),
+            category,
+            tags,
+            clubid,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        });
+
+        res.status(201).json({ message: 'Post created successfully'});
     } catch (error) {
-      console.error('Error creating post:', error);
-      res.status(500).json({ message: 'Failed to create post' });
+        console.error('Error creating post:', error);
+        res.status(500).json({ message: 'Failed to create post' });
     }
-  });
+});
 
   //delete post 
 
